@@ -66,6 +66,7 @@ python compute_r2.py --transcript jctranscripts_wwratio --hmp jcsnp.hmp --snp_li
 python compute_r2.py --transcript jctranscripts_dsratio --hmp jcsnp.hmp --snp_list needJC --output JEresult_D
 ```
 4.5 Final QTL Identification and Processing
+```bash
 # Generate final QTL list considering both LD and joint effect
 python finalfile_sQTL.py -l sQTLC_LD -j JEresult_C -o final_all_sQTLC
 
