@@ -54,18 +54,28 @@ python LDtreatment.py -LD LDoutC_treat_filter0.1 -ca candidate5e9sQTLC -o sQTLC_
 ```
 4.4 Joint Effect Analysis
 ```bash
-cut -f2 all1e2D5e9 | sort | uniq > allforjeC
-grep -f allforjeC -F ~/zea_mays_gene_anno/sortV5SNP.hmp.txt -w > allforjeCinfo
-cat header allforjeCinfo > allforjeC.hmp.txt
-mkdir JointEffectunpre_C
-python SNP_need_calculate.py -ld sQTLC_LD -can candidate5e9sQTLC -hmp allforjeC.hmp.txt -o JointEffectunpre_C/
-mkdir preparedforJE_C
-python jointprepareTreat.py -m matrix_wi_na_WW -un JointEffectunpre_C/ -o preparedforJE_C/
-mkdir JE_Rout_C
-for i in `ls -A preparedforJE_C`; do Rscript jointEffect.R preparedforJE_C/$i > JE_Rout_C/$i.out; done
-python treatJEoutput.py -d JE_Rout_C/ -o JEresult_C
-python finalfile_sQTL.py -j JEresult_C -l sQTLC_LD -o final_all_sQTLC
+# Prepare data for joint effect analysis
+bash je.sh
+
+# The je.sh script performs:
+# 1. Extract unique SNPs and transcripts from candidate QTLs
+# 2. Extract genotype information for these SNPs
+# 3. Extract transcript ratio data for these transcripts
+# 4. Calculate R² values between SNPs and transcripts
+python compute_r2.py --transcript jctranscripts_wwratio --hmp jcsnp.hmp --snp_list needJC --output JEresult_C
+python compute_r2.py --transcript jctranscripts_dsratio --hmp jcsnp.hmp --snp_list needJC --output JEresult_D
 ```
+4.5 Final QTL Identification and Processing
+# Generate final QTL list considering both LD and joint effect
+python finalfile_sQTL.py -l sQTLC_LD -j JEresult_C -o final_all_sQTLC
+
+# Merge QTL results with transcript information
+python merge_qtl.py -c candidate_sQTL_C -m final_all_sQTLC -t transcript.bed -o merged_qtl.txt
+
+# Add R² values and classify QTLs as cis/trans
+python merge_qtlwithr2.py JEresult_C merged_qtl.txt final_merged_qtl_with_r2.txt
+```
+
 Usage
 Each analysis can be run independently following the commands listed above. Please ensure all dependencies are installed and input files are properly formatted before execution.
 
